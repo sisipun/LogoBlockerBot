@@ -1,0 +1,49 @@
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.detection.faster_rcnn.FasterRCNN' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.detection.transform.GeneralizedRCNNTransform' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torch.nn.modules.conv.Conv2d' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.ops.misc.FrozenBatchNorm2d' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torch.nn.modules.activation.ReLU' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.resnet.Bottleneck' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torch.nn.modules.container.ModuleList' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.detection.rpn.RegionProposalNetwork' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.detection.rpn.AnchorGenerator' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torchvision.models.detection.roi_heads.RoIHeads' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\serialization.py:657: SourceChangeWarning: source code of class 'torch.nn.modules.linear.Linear' has changed. you can retrieve the original source code by accessing the object's source attribute or set `torch.nn.Module.dump_patches = True` and use the patch tool to revert the changes.
+  warnings.warn(msg, SourceChangeWarning)
+F:\Programms\Anaconda3\lib\site-packages\torch\nn\functional.py:2854: UserWarning: The default behavior for interpolate/upsample with float scale_factor will change in 1.6.0 to align with other frameworks/libraries, and use scale_factor directly, instead of relying on the computed output size. If you wish to keep the old behavior, please set recompute_scale_factor=True. See the documentation of nn.Upsample for details.
+  warnings.warn("The default behavior for interpolate/upsample with float scale_factor will change "
+..\torch\csrc\utils\python_arg_parser.cpp:756: UserWarning: This overload of nonzero is deprecated:
+	nonzero(Tensor input, *, Tensor out)
+Consider using one of the following signatures instead:
+	nonzero(Tensor input, *, bool as_tuple)
+2020-06-28 14:32:44,525 (util.py:68 WorkerThread2) ERROR - TeleBot: "ApiException occurred, args=('A request to the Telegram API was unsuccessful. The server returned HTTP 400 Bad Request. Response body:\n[b\'{"ok":false,"error_code":400,"description":"Bad Request: reply message not found"}\']',)
+Traceback (most recent call last):
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\util.py", line 62, in run
+    task(*args, **kwargs)
+  File "F:/Projects/LogoBlockBot/telegram_bot.py", line 33, in image_message
+    msg = bot.reply_to(message, 'Выберите режим работы блокировщика:', reply_markup=markup)
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\__init__.py", line 1303, in reply_to
+    return self.send_message(message.chat.id, text, reply_to_message_id=message.message_id, **kwargs)
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\__init__.py", line 625, in send_message
+    reply_markup, parse_mode, disable_notification, timeout))
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\apihelper.py", line 159, in send_message
+    return _make_request(token, method_url, params=payload, method='post')
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\apihelper.py", line 65, in _make_request
+    return _check_result(method_name, result)['result']
+  File "F:\Programms\Anaconda3\lib\site-packages\telebot\apihelper.py", line 84, in _check_result
+    raise ApiException(msg, method_name, result)
+telebot.apihelper.ApiException: A request to the Telegram API was unsuccessful. The server returned HTTP 400 Bad Request. Response body:
+[b'{"ok":false,"error_code":400,"description":"Bad Request: reply message not found"}']
+"
+2020-06-28 14:32:44,525 (__init__.py:443 MainThread) ERROR - TeleBot: "A request to the Telegram API was unsuccessful. The server returned HTTP 400 Bad Request. Response body:
+[b'{"ok":false,"error_code":400,"description":"Bad Request: reply message not found"}']"
