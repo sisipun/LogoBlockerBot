@@ -1,13 +1,12 @@
 import telebot
 from telebot import types
 import os
-import re
+
 import configparser
 from PIL import Image
 from detection.logo_detector import detect_logo
 from image.image_processor import process_image, ProcessMode
-
-rgb_pattern = re.compile(r'^#(?:[0-9a-fA-F]{3}){1,2}$')
+from image.rgb_hex_converter import is_rgb_hex, hex_to_rgb
 
 config = configparser.ConfigParser()
 config.read('resources/application.conf')
@@ -16,6 +15,24 @@ telegram_token = config['Config']['telegram_token']
 bot = telebot.TeleBot(telegram_token)
 
 user_dict = {}
+color_codes = {
+    'Красный': (255, 0, 0),
+    'Оранжевый': (255, 165, 0),
+    'Желтый': (255, 255, 0),
+    'Зеленый': (0, 255, 0),
+    'Сининй': (0, 0, 255),
+    'Фиолетовый': (128, 0, 128)
+}
+process_modes = {
+    'Размытие': ProcessMode.BLUR,
+    'Заполнение': ProcessMode.FILL,
+    'Рамка': ProcessMode.BOUNDING_BOX
+}
+force_values = {
+    'Слабый': 5,
+    'Средний': 20,
+    'Сильный': 50
+}
 
 
 @bot.message_handler(commands=['start'])
@@ -28,7 +45,7 @@ def start_message(message):
 def image_message(message):
     file_id = message.photo[-1].file_id
     user_dict[message.chat.id] = {'file_id': file_id}
-    reply_with_markup(message, 'Выберите режим работы блокировщика:', ['Размытие', 'Заполнение', 'Рамка'], get_mode)
+    message_with_markup(message, 'Выберите режим работы блокировщика:', ['Размытие', 'Заполнение', 'Рамка'], get_mode)
 
 
 def get_mode(message):
@@ -36,70 +53,50 @@ def get_mode(message):
         return
 
     mode_answer = message.text
-    if mode_answer == 'Размытие':
-        mode = ProcessMode.BLUR
-    elif mode_answer == 'Заполнение':
-        mode = ProcessMode.FILL
-    elif mode_answer == 'Рамка':
-        mode = ProcessMode.BOUNDING_BOX
-    else:
-        reply_with_markup(message, 'Можно выбрать только из существующих режимов:', ['Размытие', 'Заполнение', 'Рамка'],
-                          get_mode)
+    mode = process_modes.get(mode_answer)
+    if not mode:
+        message_with_markup(message, 'Можно выбрать только из существующих режимов:',
+                            ['Размытие', 'Заполнение', 'Рамка'],
+                            get_mode)
         return
 
     user_dict[message.chat.id]['mode'] = mode
     if mode == ProcessMode.BLUR:
-        reply_with_markup(message, 'Выберите силу размытия или введите значение от 1 до 100:',
-                          ['Слабый', 'Средний', 'Сильный'],
-                          get_blur_force)
+        message_with_markup(message, 'Выберите силу размытия или введите значение от 1 до 100:',
+                            ['Слабый', 'Средний', 'Сильный'],
+                            get_blur_force)
     else:
-        reply_with_markup(message,
-                          'Выберите один из существующих цветов или RGB hex (#****** или #***):',
-                          ['Красный', 'Оранжевый', 'Желтый', 'Зеленый', 'Сининй', 'Фиолетовый'],
-                          get_color)
+        message_with_markup(message,
+                            'Выберите один из существующих цветов или RGB hex (#****** или #***):',
+                            ['Красный', 'Оранжевый', 'Желтый', 'Зеленый', 'Сининй', 'Фиолетовый'],
+                            get_color)
 
 
 def get_color(message):
     color_answer = message.text
-    if color_answer == 'Красный':
-        color = (255, 0, 0)
-    elif color_answer == 'Оранжевый':
-        color = (255, 165, 0)
-    elif color_answer == 'Желтый':
-        color = (255, 255, 0)
-    elif color_answer == 'Зеленый':
-        color = (0, 255, 0)
-    elif color_answer == 'Сининй':
-        color = (0, 0, 255)
-    elif color_answer == 'Фиолетовый':
-        color = (128, 0, 128)
-    else:
+    color_code = color_codes.get(color_answer)
+    if not color_code:
         if is_rgb_hex(color_answer):
-            color = hex_to_rgb(color_answer)
+            color_code = hex_to_rgb(color_answer)
         else:
-            reply_with_markup(message,
-                              'Значением может быть один из существующих цветов или RGB hex (#****** или #***)',
-                              ['Красный', 'Оранжевый', 'Желтый', 'Зеленый', 'Сининй', 'Фиолетовый'],
-                              get_color)
+            message_with_markup(message,
+                                'Значением может быть один из существующих цветов или RGB hex (#****** или #***)',
+                                ['Красный', 'Оранжевый', 'Желтый', 'Зеленый', 'Сининй', 'Фиолетовый'],
+                                get_color)
             return
 
-    process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'], color=color)
+    process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'], color=color_code)
 
 
 def get_blur_force(message):
-    color_answer = message.text
-    if color_answer == 'Слабый':
-        blur_force = 5
-    elif color_answer == 'Средний':
-        blur_force = 20
-    elif color_answer == 'Сильный':
-        blur_force = 50
-    else:
-        if color_answer.isdigit() and 0 < int(color_answer) <= 100:
-            blur_force = int(color_answer)
+    force_answer = message.text
+    blur_force = force_values.get(force_answer)
+    if not blur_force:
+        if force_answer.isdigit() and 0 < int(force_answer) <= 100:
+            blur_force = int(force_answer)
         else:
-            reply_with_markup(message, 'Значение должно быть от 1 до 100.', ['Слабый', 'Средний', 'Сильный'],
-                              get_blur_force)
+            message_with_markup(message, 'Значение должно быть от 1 до 100.', ['Слабый', 'Средний', 'Сильный'],
+                                get_blur_force)
             return
 
     process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'],
@@ -123,22 +120,12 @@ def process_photo(message, file_id, mode, color=(255, 0, 0), blur_force=20):
     user_dict[message.chat.id] = None
 
 
-def reply_with_markup(message, text, markup_variants, next_step=None):
+def message_with_markup(message, text, markup_variants, next_step=None):
     markup = types.ReplyKeyboardMarkup(one_time_keyboard=True)
     markup.add(*markup_variants)
     msg = bot.reply_to(message, text, reply_markup=markup)
     if next_step:
         bot.register_next_step_handler(msg, next_step)
-
-
-def is_rgb_hex(value):
-    return bool(rgb_pattern.match(value))
-
-
-def hex_to_rgb(hex):
-    hex = hex.lstrip('#')
-    hlen = len(hex)
-    return tuple(int(hex[i:i + int(hlen / 3)], 16) for i in range(0, hlen, int(hlen / 3)))
 
 
 bot.polling()

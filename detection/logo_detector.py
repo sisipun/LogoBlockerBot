@@ -2,7 +2,7 @@ import torch
 from torchvision import transforms
 
 
-def detect_logo(model_path, image, score_filter=0):
+def detect_logo(model_path, image, score_filter=0.0):
     model = torch.load(model_path, map_location=torch.device('cpu'))
     model.eval()
 
