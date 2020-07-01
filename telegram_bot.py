@@ -28,10 +28,15 @@ process_modes = {
     'Заполнение': ProcessMode.FILL,
     'Рамка': ProcessMode.BOUNDING_BOX
 }
-force_values = {
+blur_force = {
     'Слабый': 5,
     'Средний': 20,
     'Сильный': 50
+}
+filter_force = {
+    'Низкая': 0.3,
+    'Средняя': 0.5,
+    'Высокая': 0.7
 }
 
 
@@ -45,6 +50,27 @@ def start_message(message):
 def image_message(message):
     file_id = message.photo[-1].file_id
     user_dict[message.chat.id] = {'file_id': file_id}
+    message_with_markup(message,
+                        'Выберите силу фильтрации из представленных или значение от 0 до 100% '
+                        '(чем ниже тем сила фильтрации тем больше объектов будут заблокированны).',
+                        ['Низкая', 'Средняя', 'Высокая'], get_filter_force)
+
+
+def get_filter_force(message):
+    if not user_dict[message.chat.id]:
+        return
+
+    force_answer = message.text
+    filter_force_value = filter_force.get(force_answer)
+    if not filter_force_value:
+        if force_answer.isdigit() and 0 <= int(force_answer) <= 100:
+            filter_force_value = int(force_answer) / 100
+        else:
+            message_with_markup(message, 'Значение должно быть от 0 до 100%.', ['Низкая', 'Средняя', 'Высокая'],
+                                get_blur_force)
+            return
+
+    user_dict[message.chat.id]['filter_force'] = filter_force_value
     message_with_markup(message, 'Выберите режим работы блокировщика:', ['Размытие', 'Заполнение', 'Рамка'], get_mode)
 
 
@@ -85,32 +111,33 @@ def get_color(message):
                                 get_color)
             return
 
-    process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'], color=color_code)
+    process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'], color=color_code,
+                  filter_force=user_dict[message.chat.id]['filter_force'])
 
 
 def get_blur_force(message):
     force_answer = message.text
-    blur_force = force_values.get(force_answer)
-    if not blur_force:
+    blur_force_value = blur_force.get(force_answer)
+    if not blur_force_value:
         if force_answer.isdigit() and 0 < int(force_answer) <= 100:
-            blur_force = int(force_answer)
+            blur_force_value = int(force_answer)
         else:
             message_with_markup(message, 'Значение должно быть от 1 до 100.', ['Слабый', 'Средний', 'Сильный'],
                                 get_blur_force)
             return
 
     process_photo(message, user_dict[message.chat.id]['file_id'], user_dict[message.chat.id]['mode'],
-                  blur_force=blur_force)
+                  blur_force=blur_force_value, filter_force=user_dict[message.chat.id]['filter_force'])
 
 
-def process_photo(message, file_id, mode, color=(255, 0, 0), blur_force=20):
+def process_photo(message, file_id, mode, color=(255, 0, 0), blur_force=20, filter_force=0.5):
     bot.reply_to(message, 'Идет обработка изображения. Подождите...')
     bot_file = bot.get_file(file_id)
     downloaded_file = bot.download_file(bot_file.file_path)
     with open(bot_file.file_path, 'wb') as new_file:
         new_file.write(downloaded_file)
     image = Image.open(bot_file.file_path).convert('RGB')
-    detected_boxes = detect_logo(model_path, image, 0.5)
+    detected_boxes = detect_logo(model_path, image, filter_force)
     processed_image = process_image(image, detected_boxes, mode, color, blur_force)
     processed_image.save(bot_file.file_path, 'PNG')
     with open(bot_file.file_path, 'rb') as sendPhoto:
@@ -126,6 +153,5 @@ def message_with_markup(message, text, markup_variants, next_step=None):
     msg = bot.reply_to(message, text, reply_markup=markup)
     if next_step:
         bot.register_next_step_handler(msg, next_step)
-
 
 bot.polling()
